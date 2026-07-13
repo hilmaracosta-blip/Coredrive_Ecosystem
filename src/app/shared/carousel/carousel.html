@@ -1,0 +1,24 @@
+<div class="relative w-full max-w-4xl mx-auto overflow-hidden">
+  <div class="flex transition-transform duration-500" [style.transform]="'translateX(-' + currentIndex() * 100 + '%)'">
+    <div *ngFor="let slide of slides" class="min-w-full">
+      <img [src]="slide.image" [alt]="slide.title" class="w-full h-[500px] object-cover rounded-lg">
+      <h3 class="font-bold mt-2 text-center text-white">{{ slide.title }}</h3>
+    </div>
+  </div>
+
+  <div class="flex justify-center mt-4 gap-2">
+    <button *ngFor="let slide of slides; let i = index"
+            (click)="currentIndex.set(i)"
+            [class.bg-white]="currentIndex() === i"
+            [class.bg-gray-500]="currentIndex() !== i"
+            class="w-3 h-3 rounded-full transition-all">
+    </button>
+  </div>
+
+  <button (click)="prev()" class="absolute left-0 top-1/2 transform -translate-y-1/2 bg-white/50 p-2 rounded-r-lg hover:bg-white/80 transition">
+    &#10094;
+  </button>
+  <button (click)="next()" class="absolute right-0 top-1/2 transform -translate-y-1/2 bg-white/50 p-2 rounded-l-lg hover:bg-white/80 transition">
+    &#10095;
+  </button>
+</div>

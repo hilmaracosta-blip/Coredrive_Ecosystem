@@ -1,0 +1,59 @@
+.dashboard-container {
+  background: #f7f9f7;
+  color: #1a2b21;
+  padding: 40px;
+  min-height: 100vh;
+  font-family: sans-serif;
+  display: flex;
+  flex-direction: column;
+}
+
+.header-top { display: flex; justify-content: space-between; align-items: center; }
+.small-logo { height: 80px; width: auto; }
+
+.logout-btn {
+  background: transparent; border: 1px solid #004d2e; color: #004d2e;
+  padding: 8px 18px; border-radius: 6px; cursor: pointer; font-weight: 600; transition: all 0.2s;
+}
+.logout-btn:hover { background: #004d2e; color: #fff; }
+
+header { margin-bottom: 20px; }
+header h1 { margin: 16px 0 4px; color: #004d2e; font-weight: 700; }
+header p { color: #6b7a70; font-size: 14px; }
+
+.tabs { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; }
+.tabs button {
+  background: #fff; border: 1px solid #d1d9d4; color: #1a2b21;
+  padding: 10px 20px; border-radius: 999px; cursor: pointer;
+  font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
+  transition: all 0.2s;
+}
+.tabs button.ativa { background: #004d2e; color: #fff; border-color: #004d2e; }
+.tabs button:hover:not(.ativa) { border-color: #004d2e; color: #004d2e; }
+
+.table-card {
+  background: #ffffff; border: 1px solid #e0e6e2; border-radius: 14px; padding: 20px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 20px;
+}
+.table-card.full-width { width: 100%; overflow-x: auto; }
+.table-card h3 { margin-bottom: 12px; color: #004d2e; font-size: 15px; }
+
+table { width: 100%; border-collapse: collapse; }
+th, td { padding: 12px; text-align: left; border-bottom: 1px solid #e0e6e2; font-size: 0.9rem; }
+th { color: #6b7a70; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; }
+
+select {
+  padding: 8px; background: #f7f9f7; border: 1px solid #d1d9d4;
+  color: #1a2b21; border-radius: 6px; font-size: 0.85rem;
+}
+
+.empty-note { color: #6b7a70; font-size: 13px; text-align: center; padding: 20px 0; }
+
+.dashboard-footer {
+  margin-top: 20px; padding-top: 20px; border-top: 1px solid #e0e6e2;
+  display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center;
+}
+.social-links { display: flex; align-items: center; gap: 12px; }
+.social-label { font-size: 14px; font-weight: 600; color: #1a2b21; }
+.social-links img { width: 24px; height: 24px; }
+.copyright { font-size: 12px; color: #6b7a70; }

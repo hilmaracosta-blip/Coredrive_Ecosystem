@@ -1,0 +1,151 @@
+<div class="dashboard-container">
+  <header>
+    <div class="header-top">
+      <img src="Logo_Coredrive.png" alt="CoreDrive Ecosystem" class="small-logo">
+      <button class="logout-btn" (click)="logout()">⟲ Sair</button>
+    </div>
+    <h1>Olá, Autorizada Sul!</h1>
+    <p>Painel de Autorizada · Atualizado em {{ dataAtualizacao }}</p>
+  </header>
+
+  <!-- Abas -->
+  <div class="tabs">
+    <button [class.ativa]="abaAtiva === 'alertas'" (click)="selecionarAba('alertas')">Alertas Autorizada Sul</button>
+    <button [class.ativa]="abaAtiva === 'cliente'" (click)="selecionarAba('cliente')">Info Cliente</button>
+    <button [class.ativa]="abaAtiva === 'coleta'" (click)="selecionarAba('coleta')">Info Coleta/Reciclagem</button>
+  </div>
+
+  <!-- ABA 1: ALERTAS AUTORIZADA SUL -->
+  <div *ngIf="abaAtiva === 'alertas'">
+    <div class="table-card full-width">
+      <h3>ALERTAS AUTORIZADA SUL</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Chassi</th>
+            <th>Série BAT</th>
+            <th>Tensão (V)</th>
+            <th>Temperatura (°C)</th>
+            <th>Capacidade Residual (KWh)</th>
+            <th>Ciclos</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let b of alertasSul">
+            <td>{{ b.chassi }}</td>
+            <td>{{ b.serieBat }}</td>
+            <td>{{ b.tensao }}</td>
+            <td>{{ b.temperatura }}</td>
+            <td>{{ b.capacidade }}</td>
+            <td>{{ b.ciclos }}</td>
+            <td><span [class]="'status-solid ' + b.statusClass">{{ b.status }}</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ABA 2: INFO CLIENTE -->
+  <div *ngIf="abaAtiva === 'cliente'">
+    <div class="table-card full-width">
+      <h3>Buscar Cliente por Chassi</h3>
+      <div class="input-group busca-group">
+        <input type="text" [(ngModel)]="buscaChassi" placeholder="Ex: CH-109" (keyup.enter)="buscarCliente()">
+        <button (click)="buscarCliente()">Buscar</button>
+      </div>
+      <p class="empty-note" *ngIf="buscaRealizada && !clienteEncontrado">Nenhum cliente encontrado para o chassi informado.</p>
+    </div>
+
+    <div class="client-card" *ngIf="clienteEncontrado">
+      <h3>Dados do Cliente</h3>
+      <p><strong>Cliente:</strong> {{ clienteEncontrado.cliente }}</p>
+      <p><strong>Veículo:</strong> {{ clienteEncontrado.fabricante }} {{ clienteEncontrado.modelo }} | Chassi: <strong>{{ clienteEncontrado.chassi }}</strong></p>
+      <p><strong>Endereço:</strong> {{ clienteEncontrado.endereco }}, {{ clienteEncontrado.cidade }} - CEP {{ clienteEncontrado.cep }}</p>
+      <p><strong>Contato:</strong> {{ clienteEncontrado.contato }}</p>
+      <p><strong>Email:</strong> {{ clienteEncontrado.email }}</p>
+    </div>
+
+    <!-- Histórico de Agendamento do Cliente -->
+    <div class="table-card full-width" *ngIf="atendimentoCliente">
+      <h3>📅 Histórico de Agendamento</h3>
+      <p><strong>Serviço atual agendado:</strong> {{ atendimentoCliente.agendamentoAtual.servico }} — {{ atendimentoCliente.agendamentoAtual.data }} às {{ atendimentoCliente.agendamentoAtual.horario }} ({{ atendimentoCliente.agendamentoAtual.autorizada }})</p>
+      <div class="alert-item" *ngFor="let h of atendimentoCliente.historicoContatos">
+        <p><strong>{{ h.data }}:</strong> {{ h.mensagem }}</p>
+      </div>
+    </div>
+
+    <div class="table-card full-width" *ngIf="clienteEncontrado">
+      <h3>Mensagem para o Cliente</h3>
+      <div class="input-group">
+        <textarea [(ngModel)]="mensagemPersonalizada" rows="5"></textarea>
+      </div>
+      <button (click)="enviarMensagem()">📤 Simular Envio de Mensagem</button>
+    </div>
+
+    <!-- Logística de Baterias + Voucher lado a lado -->
+    <div class="content-grid" *ngIf="clienteEncontrado">
+      <div class="chart-card">
+        <h3>Logística de Baterias</h3>
+
+        <div class="input-group">
+          <label>Entrada (Bateria Usada - Série):</label>
+          <input type="text" [(ngModel)]="bateriaEntrada" placeholder="Ex: BAT-509">
+          <button (click)="registrarEntrada()">Confirmar Entrada</button>
+        </div>
+
+        <div class="input-group">
+          <label>Saída (Bateria Nova - Série):</label>
+          <input type="text" [(ngModel)]="bateriaSaida" placeholder="Ex: BAT-981-NEW (opcional, gerado automaticamente se vazio)">
+          <button (click)="registrarSaida()">Confirmar Saída</button>
+        </div>
+      </div>
+
+      <!-- Emissão de Voucher: só aparece se o serviço agendado for Substituição -->
+      <div class="table-card voucher-card" *ngIf="servicoEhSubstituicao()">
+        <h3>🎉 Emitir Voucher — Substituição de Bateria</h3>
+        <p><strong>Modelo do veículo:</strong> {{ clienteEncontrado.modelo }}</p>
+
+        <div *ngIf="precoSelecionado">
+          <p><strong>Valor da bateria nova:</strong> R$ {{ precoSelecionado.valorTotal }}</p>
+          <p><strong>Desconto do voucher:</strong> R$ {{ precoSelecionado.valorDesconto }}</p>
+          <p><strong>Valor final estimado:</strong> R$ {{ precoSelecionado.valorTotal - precoSelecionado.valorDesconto }}</p>
+        </div>
+        <p class="empty-note" *ngIf="!precoSelecionado">⚠️ Modelo de veículo não encontrado na tabela de preços.</p>
+
+        <button class="voucher-btn" (click)="emitirVoucher()" [disabled]="!precoSelecionado">Emitir Voucher</button>
+      </div>
+
+      <div class="empty-note full-width" *ngIf="atendimentoCliente && !servicoEhSubstituicao()">
+        ℹ️ O serviço agendado para este cliente é <strong>{{ atendimentoCliente.agendamentoAtual.servico }}</strong>. A emissão de voucher só está disponível para serviços de <strong>Substituição</strong>.
+      </div>
+    </div>
+  </div>
+
+  <!-- ABA 3: INFO COLETA/RECICLAGEM -->
+  <div *ngIf="abaAtiva === 'coleta'">
+    <div class="table-card full-width">
+      <h3>Coletas Agendadas pela Montadora</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Série BAT</th>
+            <th>Recicladora</th>
+            <th>Data de Agendamento</th>
+            <th>Nº da OS</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let b of bateriasParaColeta()">
+            <td>{{ b.serieBat }}</td>
+            <td>{{ b.idRecicladora }}</td>
+            <td>{{ b.dataColeta }}</td>
+            <td>{{ b.osColeta }}</td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="empty-note" *ngIf="bateriasParaColeta().length === 0">
+        Nenhuma coleta agendada pela Montadora no momento.
+      </p>
+    </div>
+  </div>

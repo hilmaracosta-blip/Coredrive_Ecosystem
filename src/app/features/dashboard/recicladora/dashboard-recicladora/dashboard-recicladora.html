@@ -1,0 +1,62 @@
+<p>dashboard-recicladora works!</p>
+<div class="dashboard-container">
+  <header>
+    <div class="header-top">
+      <img src="Logo_Coredrive.png" alt="CoreDrive Ecosystem" class="small-logo">
+      <button class="logout-btn" (click)="logout()">⟲ Sair</button>
+    </div>
+    <h1>Olá, Recicladora!</h1>
+    <p>Rastreio de Baterias · Atualizado em {{ dataAtualizacao }}</p>
+  </header>
+
+  <!-- Abas -->
+  <div class="tabs">
+    <button [class.ativa]="abaAtiva === 'rastreio'" (click)="selecionarAba('rastreio')">Rastreio de Baterias</button>
+  </div>
+
+  <!-- ABA: RASTREIO DE BATERIAS -->
+  <div *ngIf="abaAtiva === 'rastreio'">
+    <div class="table-card full-width">
+      <h3>Baterias em Processo de Reciclagem</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>ID da Bateria</th>
+            <th>Nº da OS</th>
+            <th>Local da Coleta</th>
+            <th>Data da Coleta</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let b of bateriasParaReciclagem()">
+            <td>{{ b.serieBat }}</td>
+            <td>{{ b.osColeta }}</td>
+            <td>{{ b.localColeta }}</td>
+            <td>{{ b.dataColeta }}</td>
+            <td>
+              <select [(ngModel)]="b.statusColeta">
+                <option [value]="null" disabled>Selecione o status</option>
+                <option *ngFor="let s of statusDisponiveis" [value]="s">{{ s }}</option>
+              </select>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="empty-note" *ngIf="bateriasParaReciclagem().length === 0">
+        Nenhuma bateria disponível para reciclagem no momento.
+      </p>
+    </div>
+  </div>
+
+  <footer class="dashboard-footer">
+    <div class="social-links">
+      <span class="social-label">Redes Sociais:</span>
+      <a href="#" aria-label="Facebook"><img src="Facebook.png" alt="Facebook"></a>
+      <a href="#" aria-label="Instagram"><img src="Instagram.png" alt="Instagram"></a>
+      <a href="#" aria-label="WhatsApp"><img src="WhatsApp.png" alt="WhatsApp"></a>
+      <a href="#" aria-label="YouTube"><img src="YouTube.png" alt="YouTube"></a>
+    </div>
+    <p class="copyright">© 2026 Coredrive Ecosystem - Criado por Hilmara Santos - Todos os direitos reservados.</p>
+  </footer>
+</div>

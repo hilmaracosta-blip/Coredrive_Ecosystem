@@ -1,0 +1,121 @@
+<div class="cliente-container">
+  <div class="header-main">
+    <img src="Logo_Coredrive.png" alt="CoreDrive Ecosystem" class="small-logo">
+    <button class="logout-btn" (click)="logout()">⟲ Sair</button>
+  </div>
+
+  <div class="security-alert">
+    <span class="icon">⚠️</span>
+    <strong>ALERTA DE SEGURANÇA: Componente de alta tensão (400V-800V) e peso elevado. É proibido o manuseio ou transporte por pessoas não autorizadas. Em caso de necessidade de troca, agende exclusivamente em nossas concessionárias parceiras.</strong>
+  </div>
+
+  <h2>Olá, {{ cliente?.cliente }}!</h2>
+
+  <!-- Dados do veículo e status da bateria -->
+  <div class="battery-grid">
+    <div class="card">
+      <h3>Veículo: {{ cliente?.fabricante }} {{ cliente?.modelo }}</h3>
+      <p>Chassi: <strong>{{ cliente?.chassi }}</strong></p>
+      <p>Série Bateria: <strong>{{ bateria?.serieBat }}</strong></p>
+    </div>
+    <div class="card">
+      <h3>Status da Bateria</h3>
+      <div class="status-badge" [ngClass]="bateria?.statusClass">{{ bateria?.status }}</div>
+      <p>SoH / Capacidade Residual: <strong>{{ bateria?.capacidade }} KWh</strong></p>
+    </div>
+  </div>
+
+  <!-- Diagnóstico da Autorizada -->
+  <div class="alert-history" *ngIf="atendimento?.diagnostico">
+    <h3>🩺 Diagnóstico da Autorizada</h3>
+    <p>{{ atendimento?.diagnostico }}</p>
+  </div>
+
+  <!-- Agendamento -->
+  <div class="table-card">
+    <h3>📅 Agendar Visita</h3>
+    <div class="agendamento-grid">
+      <div class="input-group">
+        <label>Serviço</label>
+        <select [(ngModel)]="agendamentoForm.servico">
+          <option value="Triagem">Triagem</option>
+          <option value="Substituição">Substituição</option>
+          <option value="Reparo">Reparo</option>
+        </select>
+      </div>
+      <div class="input-group">
+        <label>Data</label>
+        <input type="text" [(ngModel)]="agendamentoForm.data" placeholder="Ex: 21/03/2026">
+      </div>
+      <div class="input-group">
+        <label>Horário</label>
+        <input type="text" [(ngModel)]="agendamentoForm.horario" placeholder="Ex: 08:00">
+      </div>
+      <div class="input-group">
+        <label>Autorizada</label>
+        <select [(ngModel)]="agendamentoForm.autorizadaSelecionada">
+          <option *ngFor="let a of autorizadas" [value]="a.nome">{{ a.nome }}</option>
+        </select>
+      </div>
+    </div>
+    <p class="endereco-preview" *ngIf="agendamentoForm.autorizadaSelecionada">
+      📍 {{ getEnderecoSelecionado() }}
+    </p>
+    <button (click)="confirmarAgendamento()">Confirmar Agendamento</button>
+  </div>
+
+  <!-- Checklist de Serviços -->
+  <div class="table-card" *ngIf="atendimento">
+    <h3>✅ Acompanhamento do Atendimento</h3>
+    <p class="checklist-note">Marcado pela Autorizada no momento do atendimento.</p>
+    <div class="checklist">
+      <div class="checklist-item">
+        <input type="checkbox" [checked]="atendimento.checklist.triagem.realizado" disabled>
+        <span>Triagem <em *ngIf="atendimento.checklist.triagem.realizado">— concluída em {{ atendimento.checklist.triagem.data }} às {{ atendimento.checklist.triagem.hora }}</em></span>
+      </div>
+      <div class="checklist-item">
+        <input type="checkbox" [checked]="atendimento.checklist.substituicao.realizado" disabled>
+        <span>Substituição <em *ngIf="atendimento.checklist.substituicao.realizado">— concluída em {{ atendimento.checklist.substituicao.data }} às {{ atendimento.checklist.substituicao.hora }}</em></span>
+      </div>
+      <div class="checklist-item">
+        <input type="checkbox" [checked]="atendimento.checklist.reparo.realizado" disabled>
+        <span>Reparo <em *ngIf="atendimento.checklist.reparo.realizado">— concluído em {{ atendimento.checklist.reparo.data }} às {{ atendimento.checklist.reparo.hora }}</em></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Voucher / Substituição concluída -->
+  <div class="voucher-card" *ngIf="atendimento?.concluido">
+    <h3>🎉 Voucher de Sustentabilidade Aplicado</h3>
+    <p>Valor total da nova bateria: <strong>R$ {{ atendimento?.valorTotalBateria }},00</strong></p>
+    <p>Voucher: <strong>{{ atendimento?.voucher?.codigo }}</strong> — Desconto: <strong>- R$ {{ atendimento?.voucher?.valor }},00</strong></p>
+    <hr>
+    <p>Valor final pago: <strong>R$ {{ atendimento?.valorPago }},00</strong></p>
+
+    <div class="nova-bateria-info">
+      <p><strong>Nova Bateria:</strong> {{ atendimento?.novaBateria?.serie }}</p>
+      <p><strong>🛡️ Selo de Garantia válida até:</strong> {{ atendimento?.novaBateria?.garantiaAte }}</p>
+    </div>
+
+    <button class="nf-btn" (click)="emitirNotaFiscal()">📄 Emitir Nota Fiscal</button>
+  </div>
+
+  <!-- Histórico de Contatos -->
+  <div class="alert-history" *ngIf="atendimento">
+    <h3>🔔 Histórico de Contatos</h3>
+    <div class="alert-item" *ngFor="let h of atendimento.historicoContatos">
+      <p><strong>{{ h.data }}:</strong> {{ h.mensagem }}</p>
+    </div>
+  </div>
+
+  <footer class="dashboard-footer">
+    <div class="social-links">
+      <span class="social-label">Redes Sociais:</span>
+      <a href="#" aria-label="Facebook"><img src="Facebook.png" alt="Facebook"></a>
+      <a href="#" aria-label="Instagram"><img src="Instagram.png" alt="Instagram"></a>
+      <a href="#" aria-label="WhatsApp"><img src="WhatsApp.png" alt="WhatsApp"></a>
+      <a href="#" aria-label="YouTube"><img src="YouTube.png" alt="YouTube"></a>
+    </div>
+    <p class="copyright">© 2026 Coredrive Ecosystem - Criado por Hilmara Santos - Todos os direitos reservados.</p>
+  </footer>
+</div>

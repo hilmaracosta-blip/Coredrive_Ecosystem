@@ -1,0 +1,239 @@
+<div class="dashboard-container">
+  <header>
+    <div class="header-top">
+      <img src="Logo_Coredrive.png" alt="CoreDrive Ecosystem" class="small-logo">
+      <button class="logout-btn" (click)="logout()">⟲ Sair</button>
+    </div>
+    <h1>Olá, Atlanta!</h1>
+    <p>Monitoramento de Frota · Atualizado em {{ dataAtualizacao }}</p>
+  </header>
+
+  <!-- Abas -->
+  <div class="tabs">
+    <button [class.ativa]="abaAtiva === 'telemetria'" (click)="selecionarAba('telemetria')">Telemetria Montadora</button>
+    <button [class.ativa]="abaAtiva === 'autorizadas'" (click)="selecionarAba('autorizadas')">Info Autorizadas</button>
+    <button [class.ativa]="abaAtiva === 'coleta'" (click)="selecionarAba('coleta')">Coleta/Reciclagem</button>
+  </div>
+
+  <!-- ABA 1: TELEMETRIA MONTADORA -->
+  <div *ngIf="abaAtiva === 'telemetria'">
+    <div class="stats-cards">
+      <div class="card normal-card"><h3>{{ getTotalPorStatus('NORMAL') }}</h3><p>Normal</p></div>
+      <div class="card atencao-card"><h3>{{ getTotalPorStatus('ATENÇÃO') }}</h3><p>Atenção</p></div>
+      <div class="card critico-card"><h3>{{ getTotalPorStatus('CRÍTICO') }}</h3><p>Crítico</p></div>
+    </div>
+
+    <div class="table-card full-width">
+      <table>
+        <thead>
+          <tr>
+            <th>Chassi</th>
+            <th>Série BAT</th>
+            <th>Lote</th>
+            <th>Tensão (V)</th>
+            <th>Temperatura (°C)</th>
+            <th>Capacidade Residual (KWh)</th>
+            <th>Ciclos</th>
+            <th>Status</th>
+            <th>ID Autorizada</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let b of baterias">
+            <td>{{ b.chassi }}</td>
+            <td>{{ b.serieBat }}</td>
+            <td>{{ b.lote }}</td>
+            <td>{{ b.tensao }}</td>
+            <td>{{ b.temperatura }}</td>
+            <td>{{ b.capacidade }}</td>
+            <td>{{ b.ciclos }}</td>
+            <td><span [class]="'status ' + b.statusClass">{{ b.status }}</span></td>
+            <td>{{ b.idAutorizada }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ABA 2: INFO AUTORIZADAS -->
+  <div *ngIf="abaAtiva === 'autorizadas'">
+    <div class="table-card full-width">
+      <h3>Dados Autorizada (por bateria)</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Chassi</th>
+            <th>Série BAT</th>
+            <th>ID Autorizada</th>
+            <th>Série BAT Saída (NEW BAT)</th>
+            <th>Voucher</th>
+            <th>Valor de Desconto</th>
+            <th>Data da Troca</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let b of baterias">
+            <td>{{ b.chassi }}</td>
+            <td>{{ b.serieBat }}</td>
+            <td>{{ b.idAutorizada }}</td>
+            <td>{{ b.serieBatSaida || '---' }}</td>
+            <td>{{ b.voucher || '---' }}</td>
+            <td>{{ b.valorDesconto ? 'R$ ' + b.valorDesconto : '---' }}</td>
+            <td>{{ b.dataTroca || '---' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="table-card full-width">
+      <h3>Mapa de Lotes</h3>
+      <table>
+        <thead>
+          <tr><th>Lote</th><th>Autorizada</th></tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let l of tabelaLotes">
+            <td>{{ l.lote }}</td>
+            <td>{{ l.autorizada }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="table-card full-width">
+      <h3>⚠️ Alertas — Autorizada Sul</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Chassi</th>
+            <th>Série BAT</th>
+            <th>Tensão (V)</th>
+            <th>Temperatura (°C)</th>
+            <th>Capacidade (KWh)</th>
+            <th>Ciclos</th>
+            <th>Status</th>
+            <th>Ação Recomendada</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let a of alertasAutorizadaSul">
+            <td>{{ a.chassi }}</td>
+            <td>{{ a.serieBat }}</td>
+            <td>{{ a.tensao }}</td>
+            <td>{{ a.temperatura }}</td>
+            <td>{{ a.capacidade }}</td>
+            <td>{{ a.ciclos }}</td>
+            <td><span [class]="'status ' + a.statusClass">{{ a.status }}</span></td>
+            <td>{{ a.acao }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+ <!-- ABA 3: COLETA/RECICLAGEM -->
+  <div *ngIf="abaAtiva === 'coleta'">
+    <div class="table-card full-width" *ngFor="let b of bateriasAguardandoColeta()">
+      <h3>♻️ Destinação da Bateria Substituída — {{ b.serieBat }}</h3>
+      <p><strong>Chassi:</strong> {{ b.chassi }} | <strong>Bateria antiga:</strong> {{ b.serieBat }} | <strong>Localização atual:</strong> {{ b.idAutorizada }}</p>
+
+      <div class="input-group">
+        <label>Selecionar Recicladora:</label>
+        <select [(ngModel)]="selecoesRecicladora[b.chassi]">
+          <option value="" disabled selected>Escolha uma recicladora</option>
+          <option *ngFor="let r of recicladorasDisponiveis" [value]="r">{{ r }}</option>
+        </select>
+      </div>
+
+      <div class="input-group">
+        <label>Data de Coleta:</label>
+        <input type="text" [(ngModel)]="datasColetaInput[b.chassi]" placeholder="Ex: 31/03/2026">
+      </div>
+
+      <p *ngIf="selecoesRecicladora[b.chassi]">
+        <strong>Local de coleta:</strong> {{ b.idAutorizada }}
+      </p>
+
+      <button (click)="emitirOSColeta(b)" [disabled]="!selecoesRecicladora[b.chassi] || !datasColetaInput[b.chassi]">Emitir Ordem de Serviço de Coleta</button>
+    </div>
+
+    <div class="table-card full-width">
+      <h3>Dados Recicladora</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Chassi</th>
+            <th>Série BAT</th>
+            <th>ID Recicladora</th>
+            <th>OS p/ Coleta</th>
+            <th>Local para Coleta</th>
+            <th>Data de Agendamento</th>
+            <th>Status</th>
+            <th>Certificado</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let b of baterias">
+            <td>{{ b.chassi }}</td>
+            <td>{{ b.serieBat }}</td>
+            <td>{{ b.idRecicladora || '---' }}</td>
+            <td>{{ b.osColeta || '---' }}</td>
+            <td>{{ b.localColeta || '---' }}</td>
+            <td>{{ b.dataColeta || '---' }}</td>
+            <td>{{ b.statusColeta || '---' }}</td>
+            <td>
+              <button (click)="abrirCertificado(b)" [disabled]="!podeEmitirCertificado(b)">
+                Emitir Certificado
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="empty-note" *ngIf="!temColetaRegistrada()">Nenhuma bateria com coleta registrada no momento.</p>
+    </div>
+  </div>
+
+  <!-- Modal do Certificado -->
+  <div class="certificado-overlay" *ngIf="certificadoAberto">
+    <div class="certificado-box">
+      <div class="certificado-conteudo">
+        <img src="Logo_Coredrive.png" alt="CoreDrive Ecosystem" class="certificado-logo">
+        <h2>Certificado de Conformidade em Logística Reversa</h2>
+        <p class="certificado-texto">
+          A <strong>CoreDrive Ecosystem</strong> certifica que a montadora
+          <strong>Atlanta Veículos Elétricos</strong> cumpriu integralmente os requisitos de
+          logística reversa estabelecidos para a bateria de tração
+          <strong>{{ bateriaCertificado?.serieBat }}</strong>, referente ao veículo de chassi
+          <strong>{{ bateriaCertificado?.chassi }}</strong>.
+        </p>
+        <p class="certificado-texto">
+          O componente foi coletado junto à <strong>{{ bateriaCertificado?.localColeta }}</strong>,
+          processado pela recicladora parceira <strong>{{ bateriaCertificado?.idRecicladora }}</strong>
+          sob a Ordem de Serviço <strong>{{ bateriaCertificado?.osColeta }}</strong>, tendo seu ciclo de
+          reciclagem concluído em conformidade com as normas ambientais aplicáveis e com os
+          princípios de economia circular do Ecossistema CoreDrive.
+        </p>
+        <div class="certificado-assinatura">
+          <div class="linha-assinatura"></div>
+          <p>CoreDrive Ecosystem — Certificação de Sustentabilidade</p>
+          <p class="certificado-data">Emitido em {{ dataAtualizacao }}</p>
+        </div>
+      </div>
+      <div class="certificado-acoes">
+        <button (click)="imprimirCertificado()">🖨️ Imprimir / Salvar PDF</button>
+        <button class="fechar-btn" (click)="fecharCertificado()">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="dashboard-footer">
+    <div class="social-links">
+      <span class="social-label">Redes Sociais:</span>
+      <a href="#" aria-label="Facebook"><img src="Facebook.png" alt="Facebook"></a>
+      <a href="#" aria-label="Instagram"><img src="Instagram.png" alt="Instagram"></a>
+      <a href="#" aria-label="WhatsApp"><img src="WhatsApp.png" alt="WhatsApp"></a>
+      <a href="#" aria-label="YouTube"><img src="YouTube.png" alt="YouTube"></a>
+    </div>
+    <p class="copyright">© 2026 Coredrive Ecosystem - Criado por Hilmara Santos - Todos os direitos reservados.</p>
+  </footer>
+</div>
