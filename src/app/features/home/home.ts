@@ -15,10 +15,25 @@ export class HomeComponent implements AfterViewInit {
   videoPausado = false;
 
   ngAfterViewInit() {
-    this.videoFundo.nativeElement.play().catch(() => {
-      // navegador bloqueou o autoplay; usuário precisará clicar em play manualmente
+  const video = this.videoFundo.nativeElement;
+
+  video.addEventListener('play', () => this.videoPausado = false);
+  video.addEventListener('pause', () => this.videoPausado = true);
+
+  video.muted = true;
+
+  const tentarTocar = () => {
+    video.play().catch(() => {
+      this.videoPausado = true;
     });
+  };
+
+  if (video.readyState >= 2) {
+    tentarTocar();
+  } else {
+    video.addEventListener('canplay', tentarTocar, { once: true });
   }
+}
 
   toggleSom() {
     this.somAtivado = !this.somAtivado;
