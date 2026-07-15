@@ -78,6 +78,17 @@ export class DashboardClienteComponent {
   confirmarAgendamento() {
     if (!this.atendimento) return;
 
+    const jaEhOMesmo =
+      this.atendimento.agendamentoAtual.data === this.agendamentoForm.data &&
+      this.atendimento.agendamentoAtual.horario === this.agendamentoForm.horario &&
+      this.atendimento.agendamentoAtual.servico === this.agendamentoForm.servico &&
+      this.atendimento.agendamentoAtual.autorizada === this.agendamentoForm.autorizadaSelecionada;
+
+    if (jaEhOMesmo) {
+      alert('Esse agendamento já está confirmado.');
+      return;
+    }
+
     this.atendimento.agendamentoAtual = {
       data: this.agendamentoForm.data,
       horario: this.agendamentoForm.horario,
