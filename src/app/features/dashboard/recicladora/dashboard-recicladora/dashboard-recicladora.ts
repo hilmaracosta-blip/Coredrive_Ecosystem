@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { FrotaService } from '../../../../shared/services/frota';
 import type { Bateria } from '../../../../shared/services/frota';
+import { AuthService } from '../../../../shared/services/auth';
 
 @Component({
   selector: 'app-dashboard-reciclagem',
@@ -16,20 +17,20 @@ export class DashboardReciclagemComponent {
   dataAtualizacao = new Date().toLocaleDateString('pt-BR');
   abaAtiva: 'rastreio' = 'rastreio';
 
- statusDisponiveis = [
-  'Recebido',
-  'Triado',
-  'Destinado a Segunda Vida',
-  'Expedido / Reuso',
-  'Desativado',
-  'Triturado',
-  'Refinado',
-  'Concluído'
-];
+  statusDisponiveis = [
+    'Recebido',
+    'Triado',
+    'Destinado a Segunda Vida',
+    'Expedido / Reuso',
+    'Desativado',
+    'Triturado',
+    'Refinado',
+    'Concluído'
+  ];
 
   baterias: Bateria[];
 
-  constructor(private router: Router, private frota: FrotaService) {
+  constructor(private router: Router, private frota: FrotaService, private authService: AuthService) {
     this.baterias = this.frota.baterias;
   }
 
@@ -41,5 +42,8 @@ export class DashboardReciclagemComponent {
     return this.baterias.filter(b => b.idRecicladora);
   }
 
-  logout() { this.router.navigate(['/']); }
+  logout() {
+    this.authService.logout();
+    this.router.navigate(['/']);
+  }
 }

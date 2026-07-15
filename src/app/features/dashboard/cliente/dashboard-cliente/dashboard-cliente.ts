@@ -8,6 +8,7 @@ import { ClientesService } from '../../../../shared/services/clientes';
 import type { ClienteVeiculo } from '../../../../shared/services/clientes';
 import { AtendimentoService } from '../../../../shared/services/atendimento';
 import type { Atendimento, Autorizada } from '../../../../shared/services/atendimento';
+import { AuthService } from '../../../../shared/services/auth';
 
 @Component({
   selector: 'app-dashboard-cliente',
@@ -30,7 +31,8 @@ export class DashboardClienteComponent {
     private router: Router,
     private clientesService: ClientesService,
     private frota: FrotaService,
-    private atendimentoService: AtendimentoService
+    private atendimentoService: AtendimentoService,
+    private authService: AuthService
   ) {
     this.cliente = this.clientesService.getPorChassi(this.chassiCliente);
     this.bateria = this.frota.baterias.find(b => b.chassi === this.chassiCliente);
@@ -97,5 +99,8 @@ export class DashboardClienteComponent {
     alert('[SIMULAÇÃO] Nota fiscal emitida para a bateria ' + this.atendimento?.novaBateria?.serie);
   }
 
-  logout() { this.router.navigate(['/']); }
+  logout() {
+    this.authService.logout();
+    this.router.navigate(['/']);
+  }
 }

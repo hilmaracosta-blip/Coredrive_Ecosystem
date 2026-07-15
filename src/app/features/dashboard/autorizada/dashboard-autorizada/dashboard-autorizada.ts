@@ -10,6 +10,7 @@ import { AtendimentoService } from '../../../../shared/services/atendimento';
 import type { Atendimento } from '../../../../shared/services/atendimento';
 import { PrecosService } from '../../../../shared/services/precos';
 import type { PrecoBateria } from '../../../../shared/services/precos';
+import { AuthService } from '../../../../shared/services/auth';
 
 @Component({
   selector: 'app-dashboard-authorized',
@@ -40,7 +41,8 @@ export class DashboardAuthorizedComponent {
     private frota: FrotaService,
     private clientesService: ClientesService,
     private atendimentoService: AtendimentoService,
-    private precosService: PrecosService
+    private precosService: PrecosService,
+    private authService: AuthService
   ) {
     this.alertasSul = this.frota.getPorAutorizada('Autorizada Sul');
   }
@@ -141,5 +143,8 @@ export class DashboardAuthorizedComponent {
     return this.frota.getPorAutorizada('Autorizada Sul').filter(b => b.idRecicladora);
   }
 
-  logout() { this.router.navigate(['/']); }
+  logout() {
+    this.authService.logout();
+    this.router.navigate(['/']);
+  }
 }

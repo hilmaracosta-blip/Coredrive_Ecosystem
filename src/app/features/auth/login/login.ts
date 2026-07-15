@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink, Router } from '@angular/router';
 import { CarouselComponent } from '../../../shared/carousel/carousel';
+import { AuthService } from '../../../shared/services/auth';
 
 @Component({
   selector: 'app-login',
@@ -36,7 +37,7 @@ export class LoginComponent {
     { image: 'banco_baterias.png', title: 'Banco de Baterias' }
   ];
 
-  constructor(private router: Router) {}
+  constructor(private router: Router, private authService: AuthService) {}
 
   selecionarTipo(tipo: any) {
     this.tipoSelecionado = tipo;
@@ -50,6 +51,7 @@ export class LoginComponent {
     const senhaValida = this.senha === '123456';
 
     if (usuarioValido && senhaValida) {
+      this.authService.login(this.tipoSelecionado.prefixo);
       this.router.navigate([this.tipoSelecionado.rota]);
     } else {
       this.erroLogin = 'Usuário ou senha inválidos.';

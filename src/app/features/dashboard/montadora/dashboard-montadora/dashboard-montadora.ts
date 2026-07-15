@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { FrotaService } from '../../../../shared/services/frota';
 import type { Bateria } from '../../../../shared/services/frota';
+import { AuthService } from '../../../../shared/services/auth';
 
 @Component({
   selector: 'app-dashboard-manufacturer',
@@ -24,7 +25,7 @@ export class DashboardMontadoraComponent {
   certificadoAberto = false;
   bateriaCertificado: Bateria | null = null;
 
-  constructor(private router: Router, private frota: FrotaService) {
+  constructor(private router: Router, private frota: FrotaService, private authService: AuthService) {
     this.baterias = this.frota.baterias;
   }
 
@@ -99,5 +100,8 @@ export class DashboardMontadoraComponent {
     window.print();
   }
 
-  logout() { this.router.navigate(['/']); }
+  logout() {
+    this.authService.logout();
+    this.router.navigate(['/']);
+  }
 }
